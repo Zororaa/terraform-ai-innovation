@@ -1,0 +1,97 @@
+name: Terraform Infrastructure Pipeline (dev eu-west-1)
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'dev/eu-west-1/**'
+  push:
+    branches: [ main ]
+    paths:
+     - 'dev/eu-west-1/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      # output the list of top level directories changed in the dev/eu-west-1/ directory
+      changed_dirs: ${{ steps.get-dirs.outputs.changed_dirs }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Detect Changed Workspaces
+        id: filter
+        uses: dorny/paths-filter@v4
+        with:
+          list-files: shell
+          filters: |
+            workspaces:
+              - 'dev/eu-west-1/**'
+
+      - name: Get changed directories
+        id: get-dirs
+        run: |
+          if [[ "${{ steps.filter.outputs.workspaces }}" == "true" ]]; then
+            # Get unique top-level directories under dev/eu-west-1/
+            # Filter out deleted directories by checking if they still exist
+            changed_dirs=$(echo "${{ steps.filter.outputs.workspaces_files }}" | \
+              tr ' ' '\n' | \
+              grep '^dev/eu-west-1/' | \
+              cut -d'/' -f1-3 | \
+              sort -u | \
+              while IFS= read -r dir; do
+                if [[ -d "$dir" ]]; then
+                  echo "$dir"
+                fi
+              done | \
+              jq -R -s -c 'split("\n")[:-1]')
+          else
+            # No changes detected
+            changed_dirs='[]'
+          fi
+
+          echo "changed_dirs=$changed_dirs" >> $GITHUB_OUTPUT
+          echo "Changed directories: $changed_dirs"
+
+  terraform-pr:
+    needs:
+      - detect-changes
+    if: ${{ needs.detect-changes.outputs.changed_dirs != '[]' && github.ref_name != 'main' }}
+    strategy:
+      matrix:
+        workspace_dir: ${{fromJSON(needs.detect-changes.outputs.changed_dirs)}}
+      max-parallel: 1
+    uses: atl-ai-innovation/shared-workflows/.github/workflows/terraform-deployment.yaml@main
+    with:
+      read_only_role_arn: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
+      read_write_role_arn: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
+      tf_directory: ${{ matrix.workspace_dir }}
+      tf_aws_region: eu-west-1
+    secrets:
+      APP_ID: ${{ secrets.REPO_AUTH_APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.REPO_AUTH_APP_PK }}
+      ATL_DOMAIN_TLS_CERT_PK: ${{ secrets.ATL_DOMAIN_TLS_CERT_PK }}
+
+  terraform-main:
+    needs:
+      - detect-changes
+    if: ${{ needs.detect-changes.outputs.changed_dirs != '[]' && github.ref_name == 'main' }}
+    strategy:
+      matrix:
+        workspace_dir: ${{fromJSON(needs.detect-changes.outputs.changed_dirs)}}
+      max-parallel: 1
+    uses: atl-ai-innovation/shared-workflows/.github/workflows/terraform-deployment.yaml@main
+    with:
+      read_only_role_arn: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
+      read_write_role_arn: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
+      tf_directory: ${{ matrix.workspace_dir }}
+      tf_aws_region: eu-west-1
+    secrets:
+      APP_ID: ${{ secrets.REPO_AUTH_APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.REPO_AUTH_APP_PK }}
+      ATL_DOMAIN_TLS_CERT_PK: ${{ secrets.ATL_DOMAIN_TLS_CERT_PK }}
