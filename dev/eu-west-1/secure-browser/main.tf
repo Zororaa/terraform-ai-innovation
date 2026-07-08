@@ -72,8 +72,8 @@ module "aws_secure_browser_atlas" {
   team                    = "atlas-developers"
   vpc_id                  = data.aws_ssm_parameter.vpc_id.insecure_value
   vpc_cidr_block          = data.aws_ssm_parameter.vpc_cidr_block.insecure_value
-  # idp_saml_metadata_xml   = file("${path.module}/idp-metadata/secure-browser-shared-eu-west-1.xml")
-  browser_policy = jsonencode(local.browser_policy)
+  idp_saml_metadata_xml   = file("${path.module}/idp-metadata/genai-dev-eu-west-1.xml")
+  browser_policy          = jsonencode(local.browser_policy)
 
   workspaces_user_settings = {
     copy_allowed                       = "Enabled"
