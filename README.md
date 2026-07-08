@@ -155,7 +155,17 @@ terraform {
 
 ### eu-west-1
 
-- [vpc](./dev/eu-west-1/vpc)
+- [vpc](./dev/eu-west-1/vpc) — Private workload VPC with Transit Gateway connectivity, VPC flow logs, and VPC endpoints
+
+#### VPC Workspace
+
+The VPC workspace provisions the core networking layer:
+
+- **Workload VPC** — Private-only VPC (no public subnets, no NAT gateway). CIDR and subnet configuration are read from the management account's SSM Parameter Store (`/shared-networking-config/spoke_vpcs/ai-innovation-genai-<env>`).
+- **Transit Gateway Attachment** — Connects the spoke VPC to the shared Transit Gateway for internet access via hub NAT gateways. All private route tables route `0.0.0.0/0` through the TGW.
+- **VPC Flow Logs** — Exported to S3 in Parquet format with Hive-compatible partitions, per-hour granularity, and 90-day retention.
+- **VPC Endpoints** — Gateway endpoints for S3 and DynamoDB; interface endpoints for CodeArtifact, ECR, CloudWatch Logs, SageMaker, API Gateway, and Systems Manager. All scoped to the AWS Organization.
+- **SSM Parameters** — VPC ID, private subnet IDs, and VPC CIDR block are published to SSM for downstream workspaces to consume.
 
 ## Commands
 
