@@ -73,9 +73,7 @@ jobs:
       tf_directory: ${{ matrix.workspace_dir }}
       tf_aws_region: eu-west-1
     secrets:
-      APP_ID: ${{ secrets.REPO_AUTH_APP_ID }}
-      APP_PRIVATE_KEY: ${{ secrets.REPO_AUTH_APP_PK }}
-      ATL_DOMAIN_TLS_CERT_PK: ${{ secrets.ATL_DOMAIN_TLS_CERT_PK }}
+      inherit
 
   terraform-main:
     needs:
@@ -92,6 +90,4 @@ jobs:
       tf_directory: ${{ matrix.workspace_dir }}
       tf_aws_region: eu-west-1
     secrets:
-      APP_ID: ${{ secrets.REPO_AUTH_APP_ID }}
-      APP_PRIVATE_KEY: ${{ secrets.REPO_AUTH_APP_PK }}
-      ATL_DOMAIN_TLS_CERT_PK: ${{ secrets.ATL_DOMAIN_TLS_CERT_PK }}
+      inherit

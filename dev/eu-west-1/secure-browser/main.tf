@@ -42,12 +42,7 @@ locals {
         ]
       }
       RestoreOnStartup = {
-        value = 4
-      }
-      RestoreOnStartupURLs = {
-        value = [
-          "https://atl-ai-innovation-aws.apollotyres.com"
-        ]
+        value = 5
       }
       ExtensionInstallBlocklist = {
         value = []
