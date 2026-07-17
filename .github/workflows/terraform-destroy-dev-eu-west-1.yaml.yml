@@ -1,0 +1,91 @@
+name: "Terraform Destroy Dev eu-west-1"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for requesting the OIDC JWT
+  contents: read  # Required for checking out the code
+
+jobs:
+  destroy-secure-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create GitHub App Token
+        id: app-token
+        # Use the official action to generate the token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.REPO_AUTH_APP_ID }}
+          private-key: ${{ secrets.REPO_AUTH_APP_PK }}
+          owner: atl-ai-innovation
+          permission-contents: read
+          permission-pull-requests: write
+          permission-metadata: read
+
+      - name: Configure Git credentials for Terraform modules
+        run: |
+          git config --global url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+          git config --global credential.helper store
+          export GIT_TERMINAL_PROMPT=0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::940348258768:role/terraform-deployment-read-write-role
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: dev/eu-west-1/secure-browser
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
+        working-directory: dev/eu-west-1/secure-browser
+
+    destroy-vpc:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Create GitHub App Token
+          id: app-token
+          # Use the official action to generate the token
+          uses: actions/create-github-app-token@v3
+          with:
+            client-id: ${{ secrets.REPO_AUTH_APP_ID }}
+            private-key: ${{ secrets.REPO_AUTH_APP_PK }}
+            owner: atl-ai-innovation
+            permission-contents: read
+            permission-pull-requests: write
+            permission-metadata: read
+
+        - name: Configure Git credentials for Terraform modules
+          run: |
+            git config --global url."https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/".insteadOf "https://github.com/"
+            git config --global credential.helper store
+            export GIT_TERMINAL_PROMPT=0
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: arn:aws:iam::940348258768:role/terraform-deployment-read-write-role
+            aws-region: eu-west-1
+
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v3
+
+        - name: Terraform Init
+          run: terraform init
+          working-directory: dev/eu-west-1/vpc
+
+        - name: Terraform Destroy
+          run: terraform destroy -auto-approve
+          working-directory: dev/eu-west-1/vpc
