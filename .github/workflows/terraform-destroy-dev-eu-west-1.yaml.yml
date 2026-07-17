@@ -35,7 +35,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::940348258768:role/terraform-deployment-read-write-role
+          role-to-assume: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
           aws-region: eu-west-1
 
       - name: Setup Terraform
@@ -50,6 +50,7 @@ jobs:
         working-directory: dev/eu-west-1/secure-browser
 
   destroy-vpc:
+    needs: destroy-secure-browser
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -76,7 +77,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::940348258768:role/terraform-deployment-read-write-role
+          role-to-assume: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
           aws-region: eu-west-1
 
       - name: Setup Terraform
