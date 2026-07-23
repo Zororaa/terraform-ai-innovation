@@ -160,12 +160,60 @@ terraform {
 #### VPC Workspace
 
 The VPC workspace provisions the core networking layer:
-
-- **Workload VPC** — Private-only VPC (no public subnets, no NAT gateway). CIDR and subnet configuration are read from the management account's SSM Parameter Store (`/shared-networking-config/spoke_vpcs/ai-innovation-genai-<env>`).
+- Workload VPC — Private-only VPC (no public subnets, no NAT gateway). Hosts application workloads: ECS tasks, RDS instances, ElastiCache, etc. CIDR and subnet configuration are read from the management account's SSM Parameter Store (`/shared-networking-config/spoke_vpcs/workload_vpc/ai-innovation-genai-<env>`).
+- Gateway VPC — Private-only VPC (no public subnets, no NAT gateway). Hosts only the shared Application Load Balancer, ALB listeners, and Route 53 private hosted zone (apollotyres.com). This separation satisfies company-specific network segmentation requirements. CIDR and subnet configuration are read from the management account's SSM Parameter Store (`/shared-networking-config/spoke_vpcs/gateway_vpc/ai-innovation-genai-<env>`).
 - **Transit Gateway Attachment** — Connects the spoke VPC to the shared Transit Gateway for internet access via hub NAT gateways. All private route tables route `0.0.0.0/0` through the TGW.
 - **VPC Flow Logs** — Exported to S3 in Parquet format with Hive-compatible partitions, per-hour granularity, and 90-day retention.
 - **VPC Endpoints** — Gateway endpoints for S3 and DynamoDB; interface endpoints for CodeArtifact, ECR, CloudWatch Logs, SageMaker, API Gateway, and Systems Manager. All scoped to the AWS Organization.
-- **SSM Parameters** — VPC ID, private subnet IDs, and VPC CIDR block are published to SSM for downstream workspaces to consume.
+
+#### Gateway VPC vs Workload VPC
+This repository will contain both a **Workload VPC** and **Gateway VPC**. The gateway VPC complies with company-specific requirements and it will only host the **Shared Application Load Balancer**, **Application Load Balancer listeners** and a **Route53 Private Hosted Zone** (apollotyres.com). Typically, the workload VPC should be used to configure any other AWS Service, e.g. ECS tasks, RDS instances, AWS Elasticache, 
+
+#### SSM Parameters
+
+We provide the following SSM Parameters
+| Parameter | Description |
+|-----------|-------------|
+| `/network/vpc_id` | Workload VPC ID |
+| `/network/vpc_cidr_block` | Workload VPC CIDR |
+| `/network/vpc_private_subnet_ids` | Workload VPC private subnet IDs |
+| `/network/gateway_vpc_id` | Gateway VPC ID |
+| `/network/gateway_vpc_cidr_block` | Gateway VPC CIDR |
+| `/network/gateway_vpc_private_subnet_ids` | Gateway VPC private subnet IDs |
+
+SSM parameters can be used as follows:
+
+```hcl
+data "aws_ssm_parameter" "vpc_id" {
+  name           = "/network/vpc_id"
+}
+
+data "aws_ssm_parameter" "vpc_cidr_block" {
+  name           = "/network/vpc_cidr_block"
+}
+
+resource "aws_security_group" "procopt_rds_sg" {
+  vpc_id      = data.aws_ssm_parameter.vpc_id.insecure_value
+  name        = "my-postgres-security-group"
+  description = "Allows inbound traffic from VPC CIDR to postgres port 5432"
+
+  ingress {
+    description = "Allow postgres port 5432 from the private subnets CIDR"
+    from_port   = local.procopt_rds_port
+    to_port     = local.procopt_rds_port
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_ssm_parameter.vpc_cidr_block.value]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1" # -1 means all protocols
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+```
 
 ## Commands
 
