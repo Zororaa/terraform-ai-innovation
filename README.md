@@ -166,9 +166,6 @@ The VPC workspace provisions the core networking layer:
 - **VPC Flow Logs** — Exported to S3 in Parquet format with Hive-compatible partitions, per-hour granularity, and 90-day retention.
 - **VPC Endpoints** — Gateway endpoints for S3 and DynamoDB; interface endpoints for CodeArtifact, ECR, CloudWatch Logs, SageMaker, API Gateway, and Systems Manager. All scoped to the AWS Organization.
 
-#### Gateway VPC vs Workload VPC
-This repository will contain both a **Workload VPC** and **Gateway VPC**. The gateway VPC complies with company-specific requirements and it will only host the **Shared Application Load Balancer**, **Application Load Balancer listeners** and a **Route53 Private Hosted Zone** (apollotyres.com). Typically, the workload VPC should be used to configure any other AWS Service, e.g. ECS tasks, RDS instances, AWS Elasticache, 
-
 #### SSM Parameters
 
 We provide the following SSM Parameters
