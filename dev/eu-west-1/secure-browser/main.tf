@@ -3,15 +3,15 @@ provider "aws" {
 }
 
 data "aws_ssm_parameter" "vpc_id" {
-  name = "/network/vpc_id"
+  name = "/network/gateway_vpc_id"
 }
 
 data "aws_ssm_parameter" "private_subnets" {
-  name = "/network/private_subnet_ids"
+  name = "/network/gateway_vpc_private_subnet_ids"
 }
 
 data "aws_ssm_parameter" "vpc_cidr_block" {
-  name = "/network/vpc_cidr_block"
+  name = "/network/gateway_vpc_cidr_block"
 }
 
 locals {
