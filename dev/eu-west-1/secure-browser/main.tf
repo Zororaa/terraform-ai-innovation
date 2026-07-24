@@ -16,10 +16,10 @@ data "aws_ssm_parameter" "vpc_cidr_block" {
 
 locals {
   tags = {
-    "Owner"       = "ai-innovation"
-    "Environment" = var.env
-    "Repository"  = "terraform-ai-innovation-genai"
-    "CostCenter"  = "shared"
+    Owner       = "ai-innovation"
+    Environment = var.env
+    Repository  = "terraform-ai-innovation-genai"
+    CostCenter  = "genai"
   }
 
   private_subnet_ids = split(",", data.aws_ssm_parameter.private_subnets.insecure_value)

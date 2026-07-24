@@ -32,13 +32,13 @@ own state file. Only workspaces that changed in a pull request or push will be p
 
 Each workspace is an independent Terraform root module. A workspace always contains the following files:
 
-| File | Purpose |
-|------|---------|
-| `main.tf` | Provider configuration, locals, and primary resource definitions |
-| `variables.tf` | Input variables with defaults |
-| `versions.tf` | Terraform and provider version constraints |
-| `backend.tf` | S3 backend configuration pointing to the workspace's state file |
-| `outputs.tf` | Output values (optional, when other workspaces need to reference data) |
+| File           | Purpose                                                                |
+|----------------|------------------------------------------------------------------------|
+| `main.tf`      | Provider configuration, locals, and primary resource definitions       |
+| `variables.tf` | Input variables with defaults                                          |
+| `versions.tf`  | Terraform and provider version constraints                             |
+| `backend.tf`   | S3 backend configuration pointing to the workspace's state file        |
+| `outputs.tf`   | Output values (optional, when other workspaces need to reference data) |
 
 ### State Management
 
@@ -80,10 +80,10 @@ The terraform job:
 
 ### PR vs Merge Behaviour
 
-| Trigger | Action |
-|---------|--------|
+| Trigger                | Action                                            |
+|------------------------|---------------------------------------------------|
 | Pull request to `main` | `terraform plan` — results posted as a PR comment |
-| Push/merge to `main` | `terraform apply` — infrastructure is deployed |
+| Push/merge to `main`   | `terraform apply` — infrastructure is deployed    |
 
 Only workspaces with file changes in the triggering event are processed.
 
@@ -101,10 +101,10 @@ All resources must include the following tags:
 ```hcl
 locals {
   tags = {
-    "Owner"       : "ai-innovation"
-    "Environment" : var.env
-    "Repository"  : "terraform-ai-innovation-genai"
-    "CostCenter"  : "shared"
+    Owner       = "ai-innovation"
+    Environment = var.env
+    Repository  = "terraform-ai-innovation-genai"
+    CostCenter  = "shared"
   }
 }
 ```
@@ -156,6 +156,7 @@ terraform {
 ### eu-west-1
 
 - [vpc](./dev/eu-west-1/vpc) — Private workload VPC with Transit Gateway connectivity, VPC flow logs, and VPC endpoints
+- [shared_ecs](./dev/eu-west-1/shared_ecs) — Shared ECS Fargate cluster for hosting application services
 
 #### VPC Workspace
 
@@ -169,14 +170,25 @@ The VPC workspace provisions the core networking layer:
 #### SSM Parameters
 
 We provide the following SSM Parameters
-| Parameter | Description |
-|-----------|-------------|
-| `/network/vpc_id` | Workload VPC ID |
-| `/network/vpc_cidr_block` | Workload VPC CIDR |
-| `/network/vpc_private_subnet_ids` | Workload VPC private subnet IDs |
-| `/network/gateway_vpc_id` | Gateway VPC ID |
-| `/network/gateway_vpc_cidr_block` | Gateway VPC CIDR |
-| `/network/gateway_vpc_private_subnet_ids` | Gateway VPC private subnet IDs |
+
+| Parameter                                 | Description                     |
+|-------------------------------------------|---------------------------------|
+| `/network/vpc_id`                         | Workload VPC ID                 |
+| `/network/vpc_cidr_block`                 | Workload VPC CIDR               |
+| `/network/vpc_private_subnet_ids`         | Workload VPC private subnet IDs |
+| `/network/gateway_vpc_id`                 | Gateway VPC ID                  |
+| `/network/gateway_vpc_cidr_block`         | Gateway VPC CIDR                |
+| `/network/gateway_vpc_private_subnet_ids` | Gateway VPC private subnet IDs  |
+
+#### Shared ECS Workspace
+
+The shared_ecs workspace provisions a shared ECS Fargate cluster used by application services across the account.
+
+| Parameter                  | Description      |
+|----------------------------|------------------|
+| `/shared/ecs/cluster_name` | ECS cluster name |
+| `/shared/ecs/cluster_id`   | ECS cluster ID   |
+| `/shared/ecs/cluster_arn`  | ECS cluster ARN  |
 
 SSM parameters can be used as follows:
 

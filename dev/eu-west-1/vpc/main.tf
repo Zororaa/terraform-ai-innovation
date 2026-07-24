@@ -10,11 +10,10 @@ locals {
   management_account_id = data.aws_organizations_organization.current.master_account_id
 
   tags = {
-    "Owner" : "ai-innovation",
-    "Environment" : var.env
-    "Repository" : "terraform-ai-innovation-genai",
-    "CostCenter" : "shared",
-    "Team" : "shared",
+    Owner       = "ai-innovation"
+    Environment = var.env
+    Repository  = "terraform-ai-innovation-genai"
+    CostCenter  = "genai"
   }
 
   current_account_name   = "ai-innovation-internal-${var.env}"
