@@ -158,6 +158,7 @@ terraform {
 - [vpc](./dev/eu-west-1/vpc) — Private workload VPC with Transit Gateway connectivity, VPC flow logs, and VPC endpoints
 - [shared_ecs](./dev/eu-west-1/shared_ecs) — Shared ECS Fargate cluster for hosting application services
 - [certificate_manager](./dev/eu-west-1/certificate_manager) — Imports `*.apollotyres.com` wildcard TLS certificate into ACM for ALB/API Gateway use
+- [shared_alb](./dev/eu-west-1/shared_alb) — Shared internal ALB, HTTPS listener, ALB security group, and Route 53 private hosted zone (`apollotyres.com`)
 
 #### VPC Workspace
 
@@ -202,6 +203,26 @@ The certificate_manager workspace imports the `*.apollotyres.com` wildcard TLS c
 | Parameter                                       | Description                                  |
 |-------------------------------------------------|----------------------------------------------|
 | `/shared/certificates/apollotyres_wildcard_arn` | ARN of the `*.apollotyres.com` ACM certificate |
+
+#### Shared ALB Workspace
+
+The shared_alb workspace provisions a shared internal Application Load Balancer deployed in the Gateway VPC, along with a Route 53 private hosted zone for internal DNS resolution.
+
+- **Internal ALB** — Deployed in the Gateway VPC private subnets. Serves as the single entry point for all internal HTTP/HTTPS traffic routed via Transit Gateway.
+- **HTTPS Listener** — Listens on port 443 using the `*.apollotyres.com` wildcard certificate from ACM. Returns a default 404 response; individual services register via listener rules.
+- **ALB Security Group** — Allows inbound HTTPS (443) from the VPC CIDR and permits all outbound traffic.
+- **Route 53 Private Hosted Zone** — `apollotyres.com`, associated with the Gateway VPC. Services create DNS records pointing to the ALB.
+
+| Parameter                                    | Description                        |
+|----------------------------------------------|------------------------------------|
+| `/shared/shared_alb/id`                      | ALB ID                             |
+| `/shared/shared_alb/arn`                     | ALB ARN                            |
+| `/shared/shared_alb/dns_name`               | ALB DNS name                       |
+| `/shared/shared_alb/zone_id`                | ALB hosted zone ID (for aliases)   |
+| `/shared/shared_alb/security_group_id`      | ALB security group ID              |
+| `/shared/shared_alb/https_listener_arn`     | HTTPS listener ARN                 |
+| `/shared/hosted_zone/private_hosted_zone_name` | Private hosted zone name        |
+| `/shared/hosted_zone/private_hosted_zone_id`   | Private hosted zone ID          |
 
 SSM parameters can be used as follows:
 
