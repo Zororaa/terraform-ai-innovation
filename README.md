@@ -157,6 +157,7 @@ terraform {
 
 - [vpc](./dev/eu-west-1/vpc) — Private workload VPC with Transit Gateway connectivity, VPC flow logs, and VPC endpoints
 - [shared_ecs](./dev/eu-west-1/shared_ecs) — Shared ECS Fargate cluster for hosting application services
+- [certificate_manager](./dev/eu-west-1/certificate_manager) — Imports `*.apollotyres.com` wildcard TLS certificate into ACM for ALB/API Gateway use
 
 #### VPC Workspace
 
@@ -180,6 +181,7 @@ We provide the following SSM Parameters
 | `/network/gateway_vpc_cidr_block`         | Gateway VPC CIDR                |
 | `/network/gateway_vpc_private_subnet_ids` | Gateway VPC private subnet IDs  |
 
+
 #### Shared ECS Workspace
 
 The shared_ecs workspace provisions a shared ECS Fargate cluster used by application services across the account.
@@ -189,6 +191,17 @@ The shared_ecs workspace provisions a shared ECS Fargate cluster used by applica
 | `/shared/ecs/cluster_name` | ECS cluster name |
 | `/shared/ecs/cluster_id`   | ECS cluster ID   |
 | `/shared/ecs/cluster_arn`  | ECS cluster ARN  |
+
+#### Certificate Manager Workspace
+
+The certificate_manager workspace imports the `*.apollotyres.com` wildcard TLS certificate into AWS Certificate Manager (ACM). The certificate is used by ALB listeners, API Gateway, and CloudFront distributions.
+
+- Certificate files live in `/certificates/` (body + CA chain)
+- Private key is injected from GitHub org secret `ATL_DOMAIN_TLS_CERT_PK` via `TF_VAR_atl_domain_tls_cert_pk`
+
+| Parameter                                       | Description                                  |
+|-------------------------------------------------|----------------------------------------------|
+| `/shared/certificates/apollotyres_wildcard_arn` | ARN of the `*.apollotyres.com` ACM certificate |
 
 SSM parameters can be used as follows:
 
