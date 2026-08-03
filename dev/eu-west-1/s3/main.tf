@@ -16,7 +16,7 @@ locals {
     "Environment" : var.env
     "Repository" : "terraform-ai-innovation-genai",
     "CostCenter" : "genai",
-    "Team" : "shared",
+    "Team" : "apexon",
   }
 
   current_account_name = "ai-innovation-internal-${var.env}"
