@@ -16,7 +16,7 @@ locals {
     CostCenter  = "genai"
   }
 
-  current_account_name   = "ai-innovation-internal-${var.env}"
+  current_account_name   = "ai-innovation-genai-${var.env}"
   workload_vpc_param_key = "arn:aws:ssm:${var.aws_region}:${local.management_account_id}:parameter/shared-networking-config/spoke_vpcs/${local.current_account_name}/workload_vpc"
   gateway_vpc_param_key  = "arn:aws:ssm:${var.aws_region}:${local.management_account_id}:parameter/shared-networking-config/spoke_vpcs/${local.current_account_name}/gateway_vpc"
 

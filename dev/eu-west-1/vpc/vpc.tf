@@ -7,7 +7,56 @@ locals {
   workload_vpc_name         = local.shared_networking_params.vpc_name
   private_subnets           = local.shared_networking_params.private_subnets
   workload_vpc_cidr         = local.shared_networking_params.vpc_cidr
-  vpc_flow_logs_bucket_name = "vpc-flow-logs-internal-${var.env}-${var.aws_region}-${data.aws_caller_identity.current.account_id}"
+  vpc_flow_logs_bucket_name = "vpc-flow-logs-genai-${var.env}-${var.aws_region}-${data.aws_caller_identity.current.account_id}"
+}
+
+data "aws_iam_policy_document" "flow_logs_bucket_policy" {
+  statement {
+    sid    = "AWSLogDeliveryWrite"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${local.vpc_flow_logs_bucket_name}/AWSLogs/aws-account-id=${data.aws_caller_identity.current.account_id}/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
+    }
+  }
+
+  statement {
+    sid    = "AWSLogDeliveryAclCheck"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+    actions   = ["s3:GetBucketAcl"]
+    resources = ["arn:aws:s3:::${local.vpc_flow_logs_bucket_name}"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:*"]
+    }
+  }
 }
 
 module "workload_vpc" {
@@ -28,8 +77,9 @@ moved {
   to   = module.vpc_flow_logs_bucket
 }
 module "vpc_flow_logs_bucket" {
-  source            = "git::https://github.com/atl-ai-innovation/terraform-modules.git//s3?ref=main"
+  source            = "git::https://github.com/atl-ai-innovation/terraform-modules.git//s3?ref=v0.10.2"
   bucket_name       = local.vpc_flow_logs_bucket_name
+  bucket_policy     = data.aws_iam_policy_document.flow_logs_bucket_policy.json
   enable_versioning = false
   prefix_lifecycle_rules = {
     "AWSLogs/" = {
