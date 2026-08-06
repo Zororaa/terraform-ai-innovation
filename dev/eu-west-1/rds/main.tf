@@ -180,9 +180,9 @@ module "atlas_rds" {
       apply_method = "immediate"
     },
     {
-      name         = "rds.extensions"
+      name         = "rds.allowed_extensions"
       value        = "pgvector"
-      apply_method = "pending-reboot" # Static parameters require a reboot
+      apply_method = "immediate"
     }
   ]
 
