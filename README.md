@@ -159,6 +159,7 @@ terraform {
 - [shared_ecs](./dev/eu-west-1/shared_ecs) — Shared ECS Fargate cluster for hosting application services
 - [certificate_manager](./dev/eu-west-1/certificate_manager) — Imports `*.apollotyres.com` wildcard TLS certificate into ACM for ALB/API Gateway use
 - [shared_alb](./dev/eu-west-1/shared_alb) — Shared internal ALB, HTTPS listener, ALB security group, and Route 53 private hosted zone (`apollotyres.com`)
+- [rds](./dev/eu-west-1/rds) — Atlas PostgreSQL RDS instance with KMS encryption, pgvector extension, and CloudWatch logging
 
 #### VPC Workspace
 
@@ -223,6 +224,17 @@ The shared_alb workspace provisions a shared internal Application Load Balancer 
 | `/shared/shared_alb/https_listener_arn`     | HTTPS listener ARN                 |
 | `/shared/hosted_zone/private_hosted_zone_name` | Private hosted zone name        |
 | `/shared/hosted_zone/private_hosted_zone_id`   | Private hosted zone ID          |
+
+#### RDS Workspace
+
+The rds workspace provisions a PostgreSQL 16 RDS instance for the Atlas application, encrypted at rest with a dedicated KMS key.
+
+| Parameter                        | Description                      |
+|----------------------------------|----------------------------------|
+| `/internal/atlas_rds/db_username` | Master username                 |
+| `/internal/atlas_rds/db_password` | Master password (SecureString)  |
+| `/internal/atlas_rds/db_hostname` | RDS instance hostname           |
+| `/internal/atlas_rds/db_port`     | RDS instance port               |
 
 SSM parameters can be used as follows:
 
