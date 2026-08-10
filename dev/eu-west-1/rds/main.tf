@@ -23,6 +23,8 @@ locals {
 
   active_name = "${local.project_name}-${local.environment}-${local.aws_region_shortcode}"
 
+  database_name = "${local.project_name}_${local.aws_region_shortcode}"
+
   rds_private_subnet_ids = split(",", data.aws_ssm_parameter.private_subnet_ids.insecure_value)
 
 }
@@ -80,6 +82,16 @@ resource "aws_ssm_parameter" "db_port" {
   tags = local.tags
 }
 
+
+resource "aws_ssm_parameter" "db_instance_name" {
+  name           = "/internal/atlas_rds/db_instance_name"
+  type           = "String"
+  insecure_value = module.atlas_rds.db_instance_name
+
+  tags = local.tags
+}
+
+
 ################################################################################
 # RDS Module
 ################################################################################
@@ -87,10 +99,11 @@ resource "aws_ssm_parameter" "db_port" {
 module "atlas_rds" {
   source = "../../../modules/atlas_rds"
 
-  active_name  = local.active_name
-  project_name = local.project_name
-  environment  = local.environment
-  aws_region   = var.aws_region
+  active_name   = local.active_name
+  project_name  = local.project_name
+  environment   = local.environment
+  database_name = local.database_name
+  aws_region    = var.aws_region
 
   vpc_id             = data.aws_ssm_parameter.vpc_id.insecure_value
   vpc_cidr_block     = data.aws_ssm_parameter.vpc_cidr_block.insecure_value

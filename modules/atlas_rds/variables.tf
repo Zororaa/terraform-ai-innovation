@@ -33,6 +33,12 @@ variable "private_subnet_ids" {
   description = "List of private subnet IDs for the DB subnet group"
 }
 
+variable "database_name" {
+  type        = string
+  description = "postgress database_name"
+}
+
+
 variable "db_admin_name" {
   type        = string
   description = "PostgreSQL administrative username"

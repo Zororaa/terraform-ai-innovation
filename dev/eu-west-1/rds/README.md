@@ -17,6 +17,7 @@ This workspace provisions a PostgreSQL RDS instance for the Atlas application in
 | `/internal/atlas_rds/db_password` | Master password (SecureString) |
 | `/internal/atlas_rds/db_hostname` | RDS instance hostname |
 | `/internal/atlas_rds/db_port` | RDS instance port |
+| `/internal/atlas_rds/db_instance_name` | RDS instance name |
 
 ## SSM Dependencies
 

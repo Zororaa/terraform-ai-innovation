@@ -113,7 +113,7 @@ module "rds_instance" {
 
   identifier = "${var.active_name}-postgres"
 
-  db_name  = replace("${var.active_name}_postgres", "-", "_")
+  db_name  = var.database_name
   username = var.db_admin_name
   port     = var.db_port
 
