@@ -39,4 +39,6 @@ locals {
     ])
   )
 
+  bucket_name_rds = "${local.active_name}-ddl-${data.aws_caller_identity.current.account_id}"
+
 }
