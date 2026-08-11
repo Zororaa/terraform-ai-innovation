@@ -9,7 +9,6 @@ data "aws_organizations_organization" "current" {}
 data "aws_caller_identity" "current" {}
 
 locals {
-  management_account_id = data.aws_organizations_organization.current.master_account_id
 
   tags = {
     "Owner" : "ai-innovation",
