@@ -97,8 +97,6 @@ jobs:
       - terraform-main
 
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
-        
-
     uses: atl-ai-innovation/shared-workflows/.github/workflows/run-sql-scripts.yaml@main
 
     with:
@@ -108,6 +106,6 @@ jobs:
       subnet_ids_ssm_param: /network/private_subnet_ids
       security_group_name: atlas-dev-euw1-database-sg
       ecs_cluster_name: shared-ecs-dev
-      task_definition_name: atlas-postgres-executor
+      task_definition_name: atlas-dev-euw1-postgres-executor
 
     secrets: inherit
