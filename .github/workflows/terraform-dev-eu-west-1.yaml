@@ -91,3 +91,23 @@ jobs:
       tf_aws_region: eu-west-1
     secrets:
       inherit
+
+  run-sql-scripts:
+    needs:
+      - terraform-main
+
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+        
+
+    uses: atl-ai-innovation/shared-workflows/.github/workflows/run-sql-scripts.yaml@main
+
+    with:
+      sql_files_dir: sql/dev/
+      role_to_assume: arn:aws:iam::446437544809:role/terraform-deployment-read-write-role
+      aws_region: eu-west-1
+      subnet_ids_ssm_param: /network/private_subnet_ids
+      security_group_name: atlas-dev-euw1-database-sg
+      ecs_cluster_name: shared-ecs-dev
+      task_definition_name: atlas-postgres-executor
+
+    secrets: inherit
