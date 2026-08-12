@@ -23,19 +23,23 @@ locals {
     "Team" : "apexon",
   }
 
-  active_name = "${local.project_name}-${local.environment}-${local.aws_region_shortcode}"
-
-  bucket_name_rds = "${local.active_name}-ddl-${data.aws_caller_identity.current.account_id}"
-
-  ddl_object_key = "sql/${local.environment}/sql_scripts.zip"
+  active_name      = "${local.project_name}-${local.environment}-${local.aws_region_shortcode}"
+  bucket_name_rds  = "${local.active_name}-ddl-${data.aws_caller_identity.current.account_id}"
+  kms_key_s3_alias = "alias/${local.project_name}-${local.environment}-s3"
+  ddl_object_key   = "sql/${local.environment}/sql_scripts.zip"
 }
 
 ################################################################################
-# Existing S3 bucket
+# Existing S3 configuration
+# NOTE: These resources are defined in the dev/eu-west-1/s3 workspace
 ################################################################################
 
 data "aws_s3_bucket" "ddl" {
   bucket = local.bucket_name_rds
+}
+
+data "aws_kms_key" "atlas_s3_kms_key" {
+  key_id = local.kms_key_s3_alias # Use KMS alias to lookup key
 }
 
 ################################################################################
@@ -92,8 +96,9 @@ module "postgres_executor" {
 
   image = "101636218814.dkr.ecr.eu-west-1.amazonaws.com/postgres_executor:0.2.0"
 
-  s3_uri        = "s3://${local.bucket_name_rds}/${local.ddl_object_key}"
-  s3_bucket_arn = data.aws_s3_bucket.ddl.arn
+  s3_uri         = "s3://${local.bucket_name_rds}/${local.ddl_object_key}"
+  s3_bucket_arn  = data.aws_s3_bucket.ddl.arn
+  s3_kms_key_arn = data.aws_kms_key.atlas_s3_kms_key.arn
 
   database_name = data.aws_ssm_parameter.db_instance_name.value
 
