@@ -194,7 +194,7 @@ module "atlas_rds" {
     },
     {
       name         = "rds.allowed_extensions"
-      value        = "pgvector"
+      value        = "vector"
       apply_method = "immediate"
     }
   ]
