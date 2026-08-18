@@ -32,6 +32,20 @@ data "aws_ssm_parameter" "apollo_wildcard_certificate" {
   name = "/shared/certificates/apollotyres_wildcard_arn"
 }
 
+# =============================================================
+# Cross-Account SSM Parameters (RAM-shared from org management)
+# =============================================================
+data "aws_organizations_organization" "current" {}
+
+locals {
+  ct_management_account_id = data.aws_organizations_organization.current.master_account_id
+  ssm_arn_prefix           = "arn:aws:ssm:${var.aws_region}:${local.ct_management_account_id}:parameter/shared-networking-config"
+}
+
+data "aws_ssm_parameter" "on_prem_cidrs" {
+  name = "${local.ssm_arn_prefix}/on_prem_cidrs"
+}
+
 locals {
   tags = {
     "Owner" : "ai-innovation",

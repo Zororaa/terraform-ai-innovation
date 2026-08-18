@@ -8,8 +8,8 @@ resource "aws_security_group" "shared_alb_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [data.aws_ssm_parameter.gateway_vpc_cidr_block.value, data.aws_ssm_parameter.workload_vpc_cidr_block.value]
-    description = "Allow HTTP from specified CIDR blocks"
+    cidr_blocks = concat([data.aws_ssm_parameter.gateway_vpc_cidr_block.value, data.aws_ssm_parameter.workload_vpc_cidr_block.value], jsondecode(data.aws_ssm_parameter.on_prem_cidrs.insecure_value))
+    description = "Allow HTTP from VPC and on-prem CIDR blocks"
   }
 
   # Allow HTTPS
@@ -17,8 +17,8 @@ resource "aws_security_group" "shared_alb_sg" {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = [data.aws_ssm_parameter.gateway_vpc_cidr_block.value, data.aws_ssm_parameter.workload_vpc_cidr_block.value]
-    description = "Allow HTTPS from specified CIDR blocks"
+    cidr_blocks = concat([data.aws_ssm_parameter.gateway_vpc_cidr_block.value, data.aws_ssm_parameter.workload_vpc_cidr_block.value], jsondecode(data.aws_ssm_parameter.on_prem_cidrs.insecure_value))
+    description = "Allow HTTPS from VPC and on-prem CIDR blocks"
   }
 
   egress {
