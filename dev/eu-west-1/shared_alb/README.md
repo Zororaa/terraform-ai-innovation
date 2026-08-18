@@ -1,57 +1,52 @@
-# Shared ALB & Private Hosted Zone
+# Shared ALB
 
-This Terraform module provisions:
+Provisions a shared internal Application Load Balancer in the Gateway VPC, along with a Route 53 private hosted zone for internal DNS resolution.
 
-- A **shared internal Application Load Balancer (ALB)**  
-- A **security group** for the ALB  
-- A **Route53 private hosted zone**  
-- SSM parameters exposing ALB attributes and hosted zone metadata  
-- Uses VPC details retrieved dynamically from **AWS SSM Parameter Store**
+## Architecture
 
----
+```
+On-Prem / Spoke VPCs ──── TGW ──── Gateway VPC ──── ALB (HTTPS:443) ──── Listener Rules ──── Target Groups
+```
 
-## Resources Created
+## Resources
 
-### 1. **AWS Application Load Balancer (ALB)**
+- **Internal ALB** — Deployed in Gateway VPC private subnets. Single entry point for all internal HTTP/HTTPS traffic.
+- **HTTPS Listener** — Port 443 with `*.apollotyres.com` wildcard certificate. Default action returns 404; services register via listener rules.
+- **ALB Security Group** — Allows HTTP/HTTPS from VPC CIDRs and on-premises CIDRs. Permits all outbound.
+- **Route 53 Private Hosted Zone** — `apollotyres.com`, associated with both Gateway and Workload VPCs.
 
-- Internal ALB
-- Deployed in private subnets read from SSM (`/network/private_subnet_ids`)
-- HTTPS/443 listener returning a default **404 Not Found** response
-- Metadata stored in SSM parameters
+## Security Group Rules
 
-### 2. **Security Group for the ALB**
+| Direction | Port | Source |
+|-----------|------|--------|
+| Ingress | 80, 443 | Gateway VPC CIDR, Workload VPC CIDR, on-prem CIDRs |
+| Egress | All | 0.0.0.0/0 |
 
-Allows:
-- HTTPS (443) inbound from VPC CIDR  
-- All outbound traffic
+On-prem CIDRs are read dynamically from the RAM-shared SSM parameter `/shared-networking-config/on_prem_cidrs` (managed in [aws-org-management](https://github.com/atl-ai-innovation/aws-org-management)).
 
-### 3. **Route53 Private Hosted Zone**
+## SSM Parameters
 
-- Hosted zone: `apollotyres.com`
-- Associated with shared VPC from SSM (`/network/vpc_id`)
+### Consumed
 
-### 4. **SSM Parameters for Cross-Account & Cross-Module Use**
+| Parameter | Source | Description |
+|-----------|--------|-------------|
+| `/network/vpc_id` | [vpc](../vpc/README.md) | Workload VPC ID (for Route 53 zone association) |
+| `/network/vpc_cidr_block` | [vpc](../vpc/README.md) | Workload VPC CIDR (for SG rules) |
+| `/network/gateway_vpc_id` | [vpc](../vpc/README.md) | Gateway VPC ID (for ALB deployment) |
+| `/network/gateway_vpc_private_subnet_ids` | [vpc](../vpc/README.md) | Gateway VPC subnets (for ALB placement) |
+| `/network/gateway_vpc_cidr_block` | [vpc](../vpc/README.md) | Gateway VPC CIDR (for SG rules) |
+| `/shared/certificates/apollotyres_wildcard_arn` | [certificate_manager](../certificate_manager/README.md) | ACM certificate ARN |
+| `/shared-networking-config/on_prem_cidrs` | [aws-org-management](https://github.com/atl-ai-innovation/aws-org-management) | On-prem CIDR list (cross-account via RAM) |
 
-Exports:
-- ALB ID  
-- ALB ARN  
-- ALB DNS name  
-- ALB zone ID  
-- ALB security group ID  
-- HTTPS Listener ARN
-- Hosted zone name  
-- Hosted zone ID  
+### Produced
 
-All stored under `/shared/...`
-
----
-
-## Module Structure
-
-This module references:
-
-- VPC details from SSM parameters:
-  - `/network/vpc_id`
-  - `/network/private_subnet_ids`
-  - `/network/vpc_cidr_block`
-- Common tags defined in `locals`
+| Parameter | Description |
+|-----------|-------------|
+| `/shared/shared_alb/id` | ALB ID |
+| `/shared/shared_alb/arn` | ALB ARN |
+| `/shared/shared_alb/dns_name` | ALB DNS name |
+| `/shared/shared_alb/zone_id` | ALB hosted zone ID (for Route 53 alias records) |
+| `/shared/shared_alb/security_group_id` | ALB security group ID |
+| `/shared/shared_alb/https_listener_arn` | HTTPS listener ARN (for registering listener rules) |
+| `/shared/hosted_zone/private_hosted_zone_name` | Private hosted zone name (`apollotyres.com`) |
+| `/shared/hosted_zone/private_hosted_zone_id` | Private hosted zone ID |
