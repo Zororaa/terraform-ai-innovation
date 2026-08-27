@@ -52,7 +52,7 @@ resource "aws_kms_alias" "s3" {
 
 resource "aws_ssm_parameter" "data_bucket_kms_key_arn" {
   name        = "/internal/data/kms_key_arn"
-  description = "ARN of the application data bucket"
+  description = "ARN of kms key"
   type        = "String"
   value       = aws_kms_key.s3.arn
 
