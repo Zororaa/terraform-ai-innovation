@@ -48,3 +48,14 @@ resource "aws_kms_alias" "s3" {
 
   target_key_id = aws_kms_key.s3.key_id
 }
+
+
+resource "aws_ssm_parameter" "data_bucket_kms_key_arn" {
+  name        = "/internal/data/kms_key_arn"
+  description = "ARN of kms key"
+  type        = "String"
+  value       = aws_kms_key.s3.arn
+
+  tags = local.tags
+}
+

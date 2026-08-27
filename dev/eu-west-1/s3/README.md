@@ -27,4 +27,14 @@ None.
 
 ### Produced
 
-None (buckets and KMS key ARN referenced directly by the [sql_executor](../sql_executor/README.md) workspace via data sources).
+This Terraform project creates the following AWS Systems Manager Parameter
+Store parameters. These values allow downstream infrastructure, such as the ECS
+application project, to reference the application data bucket and its KMS key.
+
+| Parameter name | Description | Type |
+|---|---|---|
+| `/internal/data/bucket_name` | Name of the S3 bucket used to store application data | `local.bucket_name` |
+| `/internal/data/bucket_arn` | `String` | ARN of the S3 bucket used to store application data | `module.s3_storage.bucket_arn` |
+| `/internal/data/kms_key_arn` | ARN of the KMS key used to encrypt the application data bucket | `aws_kms_key.s3.arn` |
+
+These parameters are consumed by: [shared_ecs](../shared_ecs/README.md).
