@@ -65,19 +65,6 @@ data "aws_iam_policy_document" "s3_interface_endpoint_policy" {
   }
 }
 
-data "aws_iam_policy_document" "api_gateway_endpoint_policy" {
-  statement {
-    sid    = "AllowOnlyCurrentAccount"
-    effect = "Allow"
-
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-    actions   = ["*"]
-    resources = ["*"]
-  }
-}
 
 module "vpc-endpoints" {
   source             = "git::https://github.com/atl-ai-innovation/terraform-modules.git//vpc-endpoints?ref=v0.7.2"
@@ -90,22 +77,14 @@ module "vpc-endpoints" {
       gateway_policy  = data.aws_iam_policy_document.s3_interface_endpoint_policy.json
       route_table_ids = module.workload_vpc.private_route_table_ids
     },
-    {
-      gateway_name    = "dynamodb"
-      gateway_policy  = data.aws_iam_policy_document.default_interface_endpoint_policy.json
-      route_table_ids = module.workload_vpc.private_route_table_ids
-    },
   ]
 
   enabled_interface_endpoints = [
-    { endpoint_name : "codeartifact.api", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
-    { endpoint_name : "codeartifact.repositories", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
-    { endpoint_name : "ecr.dkr", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "bedrock-runtime", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ecr.api", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "ecr.dkr", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "logs", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
-    { endpoint_name : "sagemaker.api", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
-    { endpoint_name : "sagemaker.runtime", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
-    { endpoint_name : "execute-api", endpoint_policy : data.aws_iam_policy_document.api_gateway_endpoint_policy.json },
+    { endpoint_name : "kms", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ssm", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ssmmessages", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ec2messages", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
