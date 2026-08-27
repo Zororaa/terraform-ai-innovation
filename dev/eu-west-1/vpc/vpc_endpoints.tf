@@ -81,10 +81,14 @@ module "vpc-endpoints" {
 
   enabled_interface_endpoints = [
     { endpoint_name : "bedrock-runtime", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "ecs", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "ecs-agent", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "ecs-telemetry", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ecr.api", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ecr.dkr", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "logs", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "kms", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
+    { endpoint_name : "sts", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ssm", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ssmmessages", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
     { endpoint_name : "ec2messages", endpoint_policy : data.aws_iam_policy_document.default_interface_endpoint_policy.json },
