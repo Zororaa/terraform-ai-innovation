@@ -39,5 +39,6 @@ Provisions a PostgreSQL RDS instance for the Atlas application, encrypted at res
 | `/internal/atlas_rds/db_hostname` | RDS endpoint hostname |
 | `/internal/atlas_rds/db_port` | RDS port |
 | `/internal/atlas_rds/db_instance_name` | Database name |
+| `/internal/atlas_rds/database_url` | FastAPI async database URL (SecureString) |
 
 These parameters are consumed by: [sql_executor](../sql_executor/README.md).

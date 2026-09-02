@@ -8,11 +8,11 @@ locals {
   management_account_id = data.aws_organizations_organization.current.master_account_id
 
   tags = {
-    "Owner" : "ai-innovation",
-    "Environment" : var.env
-    "Repository" : "terraform-ai-innovation-genai",
-    "CostCenter" : "genai",
-    "Team" : "apexon",
+    Owner       = "ai-innovation"
+    Environment = var.env
+    Repository  = "terraform-ai-innovation-genai"
+    CostCenter  = "genai"
+    Team        = "apexon"
   }
 
   current_account_name = "ai-innovation-genai-${var.env}"
@@ -87,6 +87,14 @@ resource "aws_ssm_parameter" "db_instance_name" {
   name           = "/internal/atlas_rds/db_instance_name"
   type           = "String"
   insecure_value = module.atlas_rds.db_instance_name
+
+  tags = local.tags
+}
+
+resource "aws_ssm_parameter" "database_url" {
+  name  = "/internal/atlas_rds/database_url"
+  type  = "SecureString"
+  value = "postgresql+asyncpg://${module.atlas_rds.db_instance_username}:${module.atlas_rds.db_instance_password}@${module.atlas_rds.db_instance_hostname}:${module.atlas_rds.db_instance_port}/${module.atlas_rds.db_instance_name}"
 
   tags = local.tags
 }
