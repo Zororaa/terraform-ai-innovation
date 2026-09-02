@@ -6,13 +6,9 @@ ON CONFLICT DO NOTHING;
 -- seed roles
 INSERT INTO roles (role_name, role_description)
 VALUES
-    ('GENYSYS_USER', 'Standard user access'),
-    ('GENYSYS_ADMIN', 'Administrator access')
+    ('ATLAS_USER', 'Standard user access'),
+    ('ATLAS_ADMIN', 'Administrator access')
 ON CONFLICT DO NOTHING;
-
--- rename GENYSYS to ATLAS
-UPDATE roles SET role_name = 'ATLAS_USER' WHERE role_name = 'GENYSYS_USER';
-UPDATE roles SET role_name = 'ATLAS_ADMIN' WHERE role_name = 'GENYSYS_ADMIN';
 
 -- assign both roles to initial user
 INSERT INTO user_roles (user_id, role_id)

@@ -29,6 +29,7 @@ locals {
   ddl_object_key   = "sql/${local.environment}/sql_scripts.zip"
 }
 
+
 ################################################################################
 # Existing S3 configuration
 # NOTE: These resources are defined in the dev/eu-west-1/s3 workspace
