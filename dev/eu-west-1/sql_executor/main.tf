@@ -1,9 +1,6 @@
 ################################################################################
 # AWS identity data sources
 ################################################################################
-
-data "aws_partition" "current" {}
-
 data "aws_caller_identity" "current" {}
 
 ################################################################################
@@ -82,6 +79,24 @@ data "aws_ssm_parameter" "db_hostname" {
 data "aws_ssm_parameter" "db_password" {
   name            = "/internal/atlas_rds/db_password"
   with_decryption = true
+}
+
+################################################################################
+# SQL scripts zip and upload
+################################################################################
+
+data "archive_file" "sql_scripts" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../../sql/${local.environment}"
+  output_path = "${path.module}/files/sql_scripts.zip"
+}
+
+resource "aws_s3_object" "sql_scripts" {
+  bucket      = data.aws_s3_bucket.ddl.id
+  key         = local.ddl_object_key
+  source      = data.archive_file.sql_scripts.output_path
+  source_hash = data.archive_file.sql_scripts.output_md5
+  kms_key_id  = data.aws_kms_key.atlas_s3_kms_key.arn
 }
 
 ################################################################################
