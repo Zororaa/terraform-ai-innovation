@@ -5,10 +5,12 @@ on:
     branches: [ main ]
     paths:
       - 'dev/eu-west-1/**'
+      - 'sql/dev/**'
   push:
     branches: [ main ]
     paths:
      - 'dev/eu-west-1/**'
+     - 'sql/dev/**'
 
 permissions:
   contents: read
@@ -22,7 +24,7 @@ jobs:
       # output the list of top level directories changed in the dev/eu-west-1/ directory
       changed_dirs: ${{ steps.get-dirs.outputs.changed_dirs }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Detect Changed Workspaces
         id: filter
@@ -95,8 +97,7 @@ jobs:
   run-sql-scripts:
     needs:
       - terraform-main
-
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main'}}
+    if: ${{ always() && !failure() && !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'}}
     uses: atl-ai-innovation/shared-workflows/.github/workflows/run-sql-scripts.yaml@main
 
     with:

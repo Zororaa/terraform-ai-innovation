@@ -21,6 +21,7 @@ WHERE u.user_email = 'dipanjan.kailthya@apollotyres.com'
       WHERE ur.user_id = u.user_id AND ur.role_id = r.role_id
   );
 
+
 -- grant Super User admin group
 INSERT INTO groups_members (group_name, member, description)
 SELECT 'Super User', 'dipanjan.kailthya@apollotyres.com', 'Administrator group'
