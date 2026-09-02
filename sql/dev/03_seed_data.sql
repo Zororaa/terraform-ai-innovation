@@ -10,17 +10,20 @@ VALUES
     ('GENYSYS_ADMIN', 'Administrator access')
 ON CONFLICT DO NOTHING;
 
+-- rename GENYSYS to ATLAS
+UPDATE roles SET role_name = 'ATLAS_USER' WHERE role_name = 'GENYSYS_USER';
+UPDATE roles SET role_name = 'ATLAS_ADMIN' WHERE role_name = 'GENYSYS_ADMIN';
+
 -- assign both roles to initial user
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.user_id, r.role_id
 FROM users u, roles r
 WHERE u.user_email = 'dipanjan.kailthya@apollotyres.com'
-  AND r.role_name IN ('GENYSYS_USER', 'GENYSYS_ADMIN')
+  AND r.role_name IN ('ATLAS_USER', 'ATLAS_ADMIN')
   AND NOT EXISTS (
       SELECT 1 FROM user_roles ur
       WHERE ur.user_id = u.user_id AND ur.role_id = r.role_id
   );
-
 
 -- grant Super User admin group
 INSERT INTO groups_members (group_name, member, description)
