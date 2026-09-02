@@ -102,7 +102,6 @@ resource "aws_s3_object" "sql_scripts" {
 ################################################################################
 # RDS PostgreSQL executor
 ################################################################################
-
 module "postgres_executor" {
   source = "git::https://github.com/atl-ai-innovation/terraform-modules.git//postgres-executor?ref=v0.11.1"
 
