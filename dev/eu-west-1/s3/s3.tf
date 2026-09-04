@@ -40,3 +40,12 @@ resource "aws_ssm_parameter" "data_bucket_arn" {
   tags = local.tags
 }
 
+resource "aws_ssm_parameter" "data_bucket_name" {
+  name        = "/internal/data/bucket_name"
+  description = "ARN of the application data bucket name"
+  type        = "String"
+  value       = local.bucket_name
+
+  tags = local.tags
+}
+
