@@ -1,11 +1,7 @@
 ################################################################################
-# AWS identity data sources
+# PostGres SQL Executor via ECS
 ################################################################################
 data "aws_caller_identity" "current" {}
-
-################################################################################
-# Locals
-################################################################################
 
 locals {
   project_name         = lower(var.project_name)
@@ -25,7 +21,6 @@ locals {
   kms_key_s3_alias = "alias/${local.project_name}-${local.environment}-s3"
   ddl_object_key   = "sql/${local.environment}/sql_scripts.zip"
 }
-
 
 ################################################################################
 # Existing S3 configuration
